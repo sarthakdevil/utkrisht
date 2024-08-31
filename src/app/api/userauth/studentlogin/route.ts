@@ -5,10 +5,11 @@ import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { db } from '../../../db';
 import { student as studentSchema } from '../../../schema';
+import { NextRequest, NextResponse } from 'next/server';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';  // You should store this in your .env.local file
 
-export default async function login(req: NextApiRequest, res: NextApiResponse) {
+export default async function login(req: NextRequest, res: NextResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }

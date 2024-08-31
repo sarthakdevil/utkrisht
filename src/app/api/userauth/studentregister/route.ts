@@ -3,8 +3,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { db } from '../../../db';
 import { student } from '../../../schema';
+import { NextRequest, NextResponse } from 'next/server';
 
-export default async function register(req: NextApiRequest, res: NextApiResponse) {
+export default async function register(req: NextRequest, res: NextResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
