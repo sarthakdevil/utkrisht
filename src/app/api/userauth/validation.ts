@@ -18,3 +18,21 @@ export const studentregistrationschema = z.object({
   proposals_approved: z.number().int().nonnegative(),
   completed: z.boolean(),
 })
+export const ProposalSchema = z.object({
+  id: z.string(), // Primary key
+  student_id: z.string(),
+  teacher_id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: z.string().optional(), // Assuming status can be optional initially
+});
+
+export const SlotSchema = z.object({
+  id: z.string(), // Primary key
+  teacher_id: z.string(),
+  //proposal_id: z.string().optional(), // Uncomment if needed in the future
+  start_time: z.date(), // Using date to represent timestamp
+  end_time: z.date(),
+  empty_slots: z.number().int().nonnegative(),
+  filled_slots: z.number().int().nonnegative(),
+});
