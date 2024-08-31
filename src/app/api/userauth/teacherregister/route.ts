@@ -1,23 +1,26 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '../../../db'; // Import your Drizzle instance
+import { db } from '../../../db'; // Ensure this is your Drizzle instance
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken'; // Import JWT
+import jwt from 'jsonwebtoken';
 import { teacher } from '../../../schema'; // Import your Drizzle schema model
 import { registrationSchema } from '../../../lib/validation'; // Import your Zod schema
-import { NextRequest, NextResponse } from 'next/server';
+import cookie from 'cookie'; // Use 'cookie' to handle cookies
 
 // Define the number of salt rounds for bcrypt
 const saltRounds = 10;
-const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY; // Ensure this is set in your .env.local file
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY!; // Ensure this is set in your .env.local file
 
-export default async function POST(req: NextRequest, res: NextResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
+    // Parse the JSON body
+    const body = req.body;
+
     // Validate input data using Zod
-    const parsed = registrationSchema.safeParse(req.body);
+    const parsed = registrationSchema.safeParse(body);
 
     if (!parsed.success) {
       return res.status(400).json({ message: 'Invalid input', errors: parsed.error.errors });
@@ -52,8 +55,18 @@ export default async function POST(req: NextRequest, res: NextResponse) {
     // Create JWT token
     const token = jwt.sign({ email }, JWT_SECRET_KEY, { expiresIn: '1h' });
 
-    // Return the token along with a success message
-    return res.status(201).json({ message: 'User created successfully', token });
+    // Set JWT as a cookie
+    res.setHeader(
+      'Set-Cookie',
+      cookie.serialize('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600 * 24 * 30, // 1 month
+        path: '/',
+      })
+    );
+
+    return res.status(201).json({ message: 'Registration successful' });
   } catch (error) {
     console.error('Error registering user:', error);
     return res.status(500).json({ message: 'Error in registration' });
